@@ -36,7 +36,7 @@
     'init_xml': [],
     'images': [],
     'update_xml': [
-        #'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'fetchmail_view.xml',
     ],
     'demo_xml': [],
