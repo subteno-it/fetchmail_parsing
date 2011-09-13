@@ -76,13 +76,11 @@ class email_server(osv.osv):
         for server in self.browse(cr, uid, ids, context=context):
             # Add patterns in context
             context['mapping_fields'] = server.list_mapping_fields(context=context)[server.id]
-            print 'server context : ', context
 
             # Call to super for standard behaviour
             super(email_server, self).fetch_mail(cr, uid, ids, context=context)
 
             # Destroy value, it must not be reused automatically for the next mail
-            print 'context destroyed'
             del(context['mapping_fields'])
 
 email_server()

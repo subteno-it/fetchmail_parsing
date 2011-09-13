@@ -39,6 +39,8 @@ class email_server_tools(osv.osv_memory):
         if custom_values is None:
             custom_values = {}
 
+        model_obj = self.pool.get(model)
+
         if isinstance(message, xmlrpclib.Binary):
             message = str(message.data)
 
@@ -57,16 +59,25 @@ class email_server_tools(osv.osv_memory):
 
             body = tools.ustr(body, encoding)
 
+        # Retrieve information about the fields
+        field_informations = model_obj.fields_get(cr, uid, [], context=context)
         # Search for patterns for specific fields
-        print 'tools context : ', context
         for field_name, pattern in context.get('mapping_fields', {}):
-            print 'pattern found : ', (field_name, pattern)
-            # Add the re.S flag to allow multi line mathcing data
+            # Add the re.S flag to allow multi line matching data
             field_data = re.search(pattern, body, re.S)
             # If the pattern matches, add its value in custom values
             if field_data:
-                print "data found : ", field_data.group(1)
-                custom_values[field_name] = field_data.group(1)
+                # Retrieve data sent by email
+                field_value = field_data.group(1)
+
+                # If we fill a m2o field, call name_search
+                if field_informations[field_name]['type'] == 'many2one':
+                    name_search_value = self.pool.get(field_informations[field_name]['relation']).name_search(cr, uid, field_value, context=context)
+                    if name_search_value:
+                        field_value = name_search_value[0][0]
+
+                # Add data in custom_values
+                custom_values[field_name] = field_value
 
         super(email_server_tools, self).process_email(cr, uid, model, message, custom_values=custom_values, attach=attach, context=context)
 
