@@ -78,7 +78,7 @@ class email_server(osv.osv):
             context['mapping_fields'] = server.list_mapping_fields(context=context)[server.id]
 
             # Call to super for standard behaviour
-            super(email_server, self).fetch_mail(cr, uid, ids, context=context)
+            super(email_server, self).fetch_mail(cr, uid, [server.id], context=context)
 
             # Destroy value, it must not be reused automatically for the next mail
             del(context['mapping_fields'])
