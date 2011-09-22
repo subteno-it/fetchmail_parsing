@@ -32,6 +32,65 @@ import xmlrpclib
 class email_server_tools(osv.osv_memory):
     _inherit = 'email.server.tools'
 
+    def _get_message_parts(self, message):
+        """
+        Extracts all parts from a message and returns them in a dict
+        Code from the mail_gateway module
+        """
+        if isinstance(message, xmlrpclib.Binary):
+            message = str(message.data)
+
+        # Warning: message_from_string doesn't always work correctly on unicode,
+        # we must use utf-8 strings here :-(
+        if isinstance(message, unicode):
+            message = message.encode('utf-8')
+
+        msg_txt = email.message_from_string(message)
+        msg = {}
+
+        fields = msg_txt.keys()
+
+        if 'Subject' in fields:
+            msg['subject'] = self._decode_header(msg_txt.get('Subject'))
+
+        if 'Content-Type' in fields:
+            msg['content-type'] = msg_txt.get('Content-Type')
+
+        if 'From' in fields:
+            msg['from'] = self._decode_header(msg_txt.get('From'))
+
+        if 'Delivered-To' in fields:
+            msg['to'] = self._decode_header(msg_txt.get('Delivered-To'))
+
+        if 'CC' in fields:
+            msg['cc'] = self._decode_header(msg_txt.get('CC'))
+
+        if 'Reply-to' in fields:
+            msg['reply-to'] = self._decode_header(msg_txt.get('Reply-To'))
+
+        if 'Date' in fields:
+            msg['date'] = self._decode_header(msg_txt.get('Date'))
+
+        if 'Content-Transfer-Encoding' in fields:
+            msg['encoding'] = msg_txt.get('Content-Transfer-Encoding')
+
+        if 'References' in fields:
+            msg['references'] = msg_txt.get('References')
+
+        if 'In-Reply-To' in fields:
+            msg['in-reply-to'] = msg_txt.get('In-Reply-To')
+
+        if not msg_txt.is_multipart() or 'text/plain' in msg.get('Content-Type', ''):
+            encoding = msg_txt.get_content_charset()
+            body = msg_txt.get_payload(decode=True)
+
+            if 'text/html' in msg_txt.get('Content-Type', ''):
+                body = tools.html2plaintext(body)
+
+            msg['body'] = tools.ustr(body, encoding)
+
+        return msg
+
     def process_email(self, cr, uid, model, message, custom_values=None, attach=True, context=None):
         if context is None:
             context = {}
@@ -41,30 +100,14 @@ class email_server_tools(osv.osv_memory):
 
         model_obj = self.pool.get(model)
 
-        if isinstance(message, xmlrpclib.Binary):
-            message = str(message.data)
-
-        if isinstance(message, unicode):
-            message = message.encode('utf-8')
-
-        msg_txt = email.message_from_string(message)
-
-        # Retrieve the body part of the message
-        body = ''
-        if not msg_txt.is_multipart() or 'text/plain' in msg_txt.get('Content-Type'):
-            encoding = msg_txt.get_content_charset()
-            body = msg_txt.get_payload(decode=True)
-            if 'text/html' in msg_txt.get('Content-Type'):
-                body = tools.html2plaintext(body)
-
-            body = tools.ustr(body, encoding)
+        message_parts = self._get_message_parts(message)
 
         # Retrieve information about the fields
         field_informations = model_obj.fields_get(cr, uid, [], context=context)
         # Search for patterns for specific fields
-        for field_name, pattern in context.get('mapping_fields', {}):
+        for field_name, message_part, pattern in context.get('mapping_fields', {}):
             # Add the re.S flag to allow multi line matching data
-            field_data = re.search(pattern, body, re.S)
+            field_data = re.search(pattern, message_parts.get(message_part, ''), re.S)
             # If the pattern matches, add its value in custom values
             if field_data:
                 # Retrieve data sent by email
@@ -77,7 +120,8 @@ class email_server_tools(osv.osv_memory):
                         field_value = name_search_value[0][0]
 
                 # Add data in custom_values
-                custom_values[field_name] = field_value.replace('&#13;', '')
+                custom_values[field_name] = str(field_value).replace('&#13;', '')
+
 
         super(email_server_tools, self).process_email(cr, uid, model, message, custom_values=custom_values, attach=attach, context=context)
 

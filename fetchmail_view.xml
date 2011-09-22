@@ -37,10 +37,12 @@
                             <tree string="Mapping field">
                                 <field name="field_id"/>
                                 <field name="pattern"/>
+                                <field name="message_part"/>
                             </tree>
                             <form string="Mapping field">
                                 <field name="field_id" select="1" domain="[('model_id', '=', parent.object_id)]"/>
                                 <field name="pattern" select="1"/>
+                                <field name="message_part" select="1"/>
                             </form>
                         </field>
                     </page>

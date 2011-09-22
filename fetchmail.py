@@ -34,11 +34,24 @@ class email_server_mapping_field(osv.osv):
     _columns = {
         'email_server_id': fields.many2one('email.server', 'Email server', ),
         'field_id': fields.many2one('ir.model.fields', 'Field', required=True, help='The model\'s field on which the variable value will be written, if found'),
-        'pattern': fields.char('Pattern', size=128, required=True, help='Pattern which will be sarched for to find the field\'s value.\nPut (.*?) for the variable part.\nExample : [[phone:(.*?)]]'),
+        'pattern': fields.char('Pattern', size=128, required=True, help='Pattern which will be sarched for to find the field\'s value.\nPut (.*?) for the variable part.\nExample : [[phone:(.*?)]].\nIn case of full content, put only (.*), without the question mark.'),
+        'message_part': fields.selection([
+            ('body', 'Body'),
+            ('subject', 'Subject'),
+            ('to', 'To'),
+            ('cc', 'CC'),
+            ('from', 'From'),
+            ('reply-to', 'Reply to'),
+            ('in-reply-to', 'In reply to'),
+            ('date', 'Date'),
+            ('references', 'References'),
+        ], 'Email part', required=True, help='This field defines the part of the email where the data will be searched for'),
+
     }
 
     _defaults = {
         'pattern': '[[Field identifier:(.*?)]]',
+        'message_part': 'body',
     }
 
 email_server_mapping_field()
@@ -62,7 +75,7 @@ class email_server(osv.osv):
             # Generates a list of patterns, format : [(field_name, pattern)]
             for mapping_field in email_server.mapping_field_ids:
                 # Escape all regex special characters but (.*?) from pattern
-                mapping_fields_data[email_server.id].append((mapping_field.field_id.name, re.sub('([[\^$|+])', '\\\\\\1', mapping_field.pattern)))
+                mapping_fields_data[email_server.id].append((mapping_field.field_id.name, mapping_field.message_part, re.sub('([[\^$|+])', '\\\\\\1', mapping_field.pattern)))
 
         return mapping_fields_data
 
