@@ -45,7 +45,7 @@ class email_server_mapping_field(osv.osv):
             ('in-reply-to', 'In reply to'),
             ('date', 'Date'),
             ('references', 'References'),
-        ], 'Email part', required=True, help='This field defines the part of the email where the data will be searched for'),
+        ], 'Message Part', required=True, help='This field defines the part of the email where the data will be searched for'),
 
     }
 
