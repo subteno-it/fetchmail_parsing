@@ -24,7 +24,7 @@
 
 {
     'name': 'Fetchmail Parsing',
-    'version': '1.0',
+    'version': '1.0.1',
     'category': 'Generic Modules/Mail Service',
     'description': """Allows to map contents from email to fields on related model""",
     'author': 'SYLEAM',
