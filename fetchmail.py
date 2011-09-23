@@ -30,6 +30,7 @@ import re
 class email_server_mapping_field(osv.osv):
     _name = 'email.server.mapping.field'
     _description = 'Variable to field mapping'
+    _order = 'field_id, sequence, id'
 
     _columns = {
         'email_server_id': fields.many2one('email.server', 'Email server', help='Email server configuration'),
@@ -46,12 +47,14 @@ class email_server_mapping_field(osv.osv):
             ('date', 'Date'),
             ('references', 'References'),
         ], 'Message Part', required=True, help='This field defines the part of the email where the data will be searched for'),
+        'sequence': fields.integer('Sequence', help='Will concatenate fields contents ordered by sequence'),
 
     }
 
     _defaults = {
         'pattern': '[[Field identifier:(.*?)]]',
         'message_part': 'body',
+        'sequence': 1,
     }
 
 email_server_mapping_field()
