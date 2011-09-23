@@ -32,7 +32,7 @@ class email_server_mapping_field(osv.osv):
     _description = 'Variable to field mapping'
 
     _columns = {
-        'email_server_id': fields.many2one('email.server', 'Email server', ),
+        'email_server_id': fields.many2one('email.server', 'Email server', help='Email server configuration'),
         'field_id': fields.many2one('ir.model.fields', 'Field', required=True, help='The model\'s field on which the variable value will be written, if found'),
         'pattern': fields.char('Pattern', size=128, required=True, help='Pattern which will be sarched for to find the field\'s value.\nPut (.*?) for the variable part.\nExample : [[phone:(.*?)]].\nIn case of full content, put only (.*), without the question mark.'),
         'message_part': fields.selection([

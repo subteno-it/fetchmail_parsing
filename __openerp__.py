@@ -25,8 +25,8 @@
 {
     'name': 'Fetchmail Parsing',
     'version': '1.0',
-    'category': 'Custom',
-    'description': """Allows to map variable names inside email body to fields on related model""",
+    'category': 'Generic Modules/Mail Service',
+    'description': """Allows to map contents from email to fields on related model""",
     'author': 'SYLEAM',
     'website': 'http://www.syleam.fr/',
     'depends': [

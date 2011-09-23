@@ -92,6 +92,9 @@ class email_server_tools(osv.osv_memory):
         return msg
 
     def process_email(self, cr, uid, model, message, custom_values=None, attach=True, context=None):
+        """
+        Adds custom values on created object from email
+        """
         if context is None:
             context = {}
 
