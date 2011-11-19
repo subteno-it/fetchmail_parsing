@@ -126,7 +126,7 @@ class email_server_tools(osv.osv_memory):
                 # Add data in custom_values
                 custom_values[field_name] = ' '.join((custom_values.get(field_name, ''), ustr(field_value).replace('&#13;', '')))
 
-        super(email_server_tools, self).process_email(cr, uid, model, message, custom_values=custom_values, attach=attach, context=context)
+        return super(email_server_tools, self).process_email(cr, uid, model, message, custom_values=custom_values, attach=attach, context=context)
 
 email_server_tools()
 
