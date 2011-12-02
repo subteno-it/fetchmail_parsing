@@ -119,12 +119,12 @@ class email_server_tools(osv.osv_memory):
 
                 # If we fill a m2o field, call name_search
                 if field_informations[field_name]['type'] == 'many2one':
-                    name_search_value = self.pool.get(field_informations[field_name]['relation']).name_search(cr, uid, field_value, context=context)
+                    name_search_value = self.pool.get(field_informations[field_name]['relation']).name_search(cr, uid, field_value.strip(), context=context)
                     if name_search_value:
-                        field_value = name_search_value[0][0]
-
-                # Add data in custom_values
-                custom_values[field_name] = ' '.join((custom_values.get(field_name, ''), ustr(field_value).replace('&#13;', '')))
+                        custom_values[field_name] = name_search_value[0][0]
+                else:
+                    # Add data in custom_values
+                    custom_values[field_name] = ' '.join((custom_values.get(field_name, ''), ustr(field_value).replace('&#13;', '')))
 
         return super(email_server_tools, self).process_email(cr, uid, model, message, custom_values=custom_values, attach=attach, context=context)
 
